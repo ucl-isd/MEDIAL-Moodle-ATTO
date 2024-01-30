@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,22 +14,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Common values helper for the Moodle tiny_medial plugin.
  *
- * @package     tiny_medial
+ * @module      tiny_medial/common
  * @copyright   2023 MEDIAL, Tim Williams <tim@medial.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+const component = 'tiny_medial';
 
-$plugin->version = 2024012301;
-$plugin->requires  = 2022112800;
-$plugin->component = 'tiny_medial';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '8.5.10';
-$plugin->dependencies = [
-    'mod_helixmedia' => '2024012301'
-];
-
-$plugin->supported = [401, 403];
+export default {
+    component,
+    pluginName: `${component}/plugin`,
+    icon: component,
+    insertmedialButtonName: `${component}_insertmedial`,
+    insertmedialMenuItemName: `${component}_insertmedial`,
+    insertmediallibMenuItemName: `${component}_insertmediallib`,
+};

@@ -17,36 +17,46 @@
 /**
  * Plugin capabilities
  *
- * @package    atto_helixatto
- * @copyright  COPYRIGHTINFO
+ * @package    tiny_medial
+ * @copyright  Streaming LTD 2023
+ * @author     Tim Williams (tim@medial.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
+$capabilities = [
 
-    'atto/helixatto:visible' => array(
+    'tiny/medial:visible' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'coursecreator' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-    'atto/helixatto:visiblemodtype' => array(
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'atto/helixatto:visible',
+    ],
+    'tiny/medial:visiblemodtype' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
+        'archetypes' => [
             'student' => CAP_ALLOW,
             'coursecreator' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-    )
+            'manager' => CAP_ALLOW,
+        ],
+        'clonepermissionsfrom' => 'atto/helixatto:visiblemodtype',
+    ],
+    'tiny/medial:addliblink' => [
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
 
-);
+];
 

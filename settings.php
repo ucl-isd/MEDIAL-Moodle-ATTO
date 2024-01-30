@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - https://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,53 +12,58 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Settings that allow configuration of the list of tex examples in the equation editor.
+ * Plugin administration pages are defined here.
  *
- * @package    atto_helixatto
- * @copyright  2015 Streaming LTD. Written by Tim Williams of Autotrain (tmw@autotrain.org)
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     tiny_medial
+ * @category    admin
+ * @copyright   2023 MEDIAL, Tim Williams <tim@medial.com>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot."/lib/editor/atto/plugins/helixatto/lib.php");
 
-$ADMIN->add('editoratto', new admin_category('atto_helixatto', new lang_string('pluginname', 'atto_helixatto')));
+require_once($CFG->dirroot.'/lib/editor/tiny/plugins/medial/lib.php');
 
-$settings = new admin_settingpage('atto_helixatto_settings', new lang_string('settings', 'atto_helixatto'));
-if ($ADMIN->fulltree) {
-    $options = array(0 => new lang_string("no"), 1 => new lang_string("yes"));
-    $hidesetting = new admin_setting_configselect('atto_helixatto/hideinsert',
-                                              new lang_string('hideinsert', 'atto_helixatto'),
-                                              new lang_string('hideinsert_desc', 'atto_helixatto'),
-                                              1,
+if ($hassiteconfig) {
+    $settings = new admin_settingpage('tiny_medial_settings', new lang_string('pluginname', 'tiny_medial'));
+
+    // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
+    if ($ADMIN->fulltree) {
+        $cfg = tiny_medial_get_defaults();
+        $options = [0 => new lang_string("no"), 1 => new lang_string("yes")];
+        $hidesetting = new admin_setting_configselect('tiny_medial/hideinsert',
+                                              new lang_string('hideinsert', 'tiny_medial'),
+                                              new lang_string('hideinsert_desc', 'tiny_medial'),
+                                              $cfg->hideinsert,
                                               $options);
-    $settings->add($hidesetting);
+        $settings->add($hidesetting);
 
-    $options = array(0 => new lang_string("no"));
-    if (atto_helixatto_has_filter()) {
-        $options[1] = new lang_string("yes");
+        $options = [0 => new lang_string("no")];
+        if (tiny_medial_has_filter()) {
+            $options[1] = new lang_string("yes");
+        }
+
+        $hidesetting = new admin_setting_configselect('tiny_medial/placeholder',
+                                              new lang_string('placeholder', 'tiny_medial'),
+                                              new lang_string('placeholder_desc', 'tiny_medial'),
+                                              $cfg->placeholder,
+                                              $options);
+        $settings->add($hidesetting);
+
+        $settings->add(new admin_setting_configtextarea('tiny_medial/modtypeperm', get_string("modtypetitle", "tiny_medial"),
+                   get_string("modtypedesc", "tiny_medial"), $cfg->modtypeperm, PARAM_TEXT));
+
+        $settings->add(new admin_setting_configtextarea('tiny_medial/uselinkdesc', get_string("uselinktitle", "tiny_medial"),
+                   get_string("uselinkdesc", "tiny_medial"), $cfg->uselinkdesc, PARAM_TEXT));
+
+        $embedopt = new admin_setting_configselect('tiny_medial/embedopt',
+                                              new lang_string('embedopt', 'tiny_medial'),
+                                              new lang_string('embedopt_desc', 'tiny_medial'),
+                                              $cfg->embedopt,
+                                              $options);
+        $settings->add($embedopt);
     }
-
-    $hidesetting = new admin_setting_configselect('atto_helixatto/placeholder',
-                                              new lang_string('placeholder', 'atto_helixatto'),
-                                              new lang_string('placeholder_desc', 'atto_helixatto'),
-                                              0,
-                                              $options);
-    $settings->add($hidesetting);
-
-    $settings->add(new admin_setting_configtextarea('atto_helixatto/modtypeperm', get_string("modtypetitle", "atto_helixatto"),
-                   get_string("modtypedesc", "atto_helixatto"), "", PARAM_TEXT));
-
-    $settings->add(new admin_setting_configtextarea('atto_helixatto/uselinkdesc', get_string("uselinktitle", "atto_helixatto"),
-                   get_string("uselinkdesc", "atto_helixatto"), "forum\r\nworkshop", PARAM_TEXT));
-
-    $embedopt = new admin_setting_configselect('atto_helixatto/embedopt',
-                                              new lang_string('embedopt', 'atto_helixatto'),
-                                              new lang_string('embedopt_desc', 'atto_helixatto'),
-                                              0,
-                                              $options);
-    $settings->add($embedopt);
 }

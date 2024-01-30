@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Atto text editor integration version file.
+ * Tiny text editor integration version file.
  *
- * @package    atto_helixatto
- * @copyright  2014 Streaming LTD
- * @author     Tim Williams (tmw@autotrain.org)
+ * @package    tiny_medial
+ * @copyright  2023 Streaming LTD
+ * @author     Tim Williams (tim@medial.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,47 +28,43 @@ require_once($CFG->dirroot.'/mod/helixmedia/locallib.php');
 require_once($CFG->dirroot.'/lib/filterlib.php');
 
 /**
- * Initialise this plugin
- * @param string $elementid
- */
-function atto_helixatto_strings_for_js() {
-    global $PAGE;
-
-    $PAGE->requires->strings_for_js(array('insert', 'cancel', 'dialogtitle', 'showvideo', 'iframe', 'thumbnail', 'link', 'newtab', 'inserttype'),
-        'atto_helixatto');
-}
-
-/**
  * Parses a list of module types and checks if they match the one we are in.
+ * @param $param The list name to check
+ * @return The module name string or false
  */
-function atto_helixatto_checklist($param) {
+function tiny_medial_checklist($param) {
     global $PAGE, $DB;
-    $config = get_config('atto_helixatto', $param);
+    $config = get_config('tiny_medial', $param);
     $types = explode("\n", $config);
     for ($i = 0; $i < count($types); $i++) {
         $types[$i] = trim($types[$i]);
         if (strlen($types[$i]) > 0 && strpos($PAGE->pagetype, 'mod-'.$types[$i]) !== false &&
-            $DB->get_record('modules', array('name' => $types[$i]))) {
+            $DB->get_record('modules', ['name' => $types[$i]])) {
             return $types[$i];
         }
     }
 
-    return false;
+    return "";
 }
 
-function atto_helixatto_has_filter($context = false) {
+/**
+ * Test if we have an active MEDIAL filter
+ * @param $context (optional) The current context
+ * @return true if there is a filter
+ */
+function tiny_medial_has_filter($context = false) {
     if ($context !== false) {
         $filters = filter_get_active_in_context($context);
         if (array_key_exists('medial', $filters)) {
             return true;
         }
-    
+
         return false;
     }
 
     global $DB;
-    // If there is no context then we just need to know that the filter is active somewhere in Moodle
-    $rec = $DB->get_records('filter_active', array('filter' => 'medial', 'active' => 1));
+    // If there is no context then we just need to know that the filter is active somewhere in Moodle.
+    $rec = $DB->get_records('filter_active', ['filter' => 'medial', 'active' => 1]);
     if ($rec && count($rec) > 0) {
         return true;
     }
@@ -76,82 +72,23 @@ function atto_helixatto_has_filter($context = false) {
     return false;
 }
 
-
 /**
- * Return the js params required for this module.
- * @return array of additional params to pass to javascript init function for this module.
- */
-function atto_helixatto_params_for_js($elementid, $options, $fpoptions) {
-    global $USER, $COURSE, $CFG;
-
-    /**Switch of button when using the activity module.
-       Use PARAM_RAW type here in case "add" is used for something other than a plugin name in other parts of moodle**/
-    $add = optional_param("add", "none", PARAM_RAW);
-    $action = optional_param("action", "none", PARAM_RAW);
-
-    $coursecontext = context_course::instance($COURSE->id);
-    $usercontextid = context_user::instance($USER->id)->id;
-    $hasfilter = atto_helixatto_has_filter($coursecontext);
-
-    $params = array();
-    $params['usercontextid'] = $usercontextid;
-    $params['disabled'] = true;
-    $params['modtype'] = "";
-    if (!$hasfilter) {
-        $params['placeholder'] = 0;
-    } else {
-        $params['placeholder'] = get_config('atto_helixatto', 'placeholder');
-    }
-    $params['linkonly'] = false;
-
-    if ($params['placeholder'] == 1) {
-        $params['linkonly'] = true;
-    } else {
-        if (atto_helixatto_checklist('uselinkdesc')) {
-            $params['linkonly'] = true;
-        }
+ * Gets the plugin config settings defaults.
+ * @return stdclass with the defaults as properties
+ **/
+function tiny_medial_get_defaults() {
+    // If we already have ATTO installed and the TINY config doesn't exist, use ATTO config for the initial default.
+    $acfg = get_config('atto_helixatto');
+    $mcfg = get_config('tiny_medial', 'hideinsert');
+    if ($acfg && $mcfg === false) {
+        return $acfg;
     }
 
-    $mtype = atto_helixatto_checklist('modtypeperm');
-
-    if ($mtype) {
-        if (has_capability('atto/helixatto:visiblemodtype', $coursecontext)) {
-            $params['disabled'] = false;
-            $params['modtype'] = $mtype;
-            $params['linkonly'] = true;
-        }
-    } else {
-        if (has_capability('atto/helixatto:visible', $coursecontext)) {
-            $params['disabled'] = false;
-        }
-    }
-
-    if ($add == "helixmedia" || $action == "grader" || $action == "grade") {
-        $params['disabled'] = true;
-    }
-
-    $params['baseurl'] = $CFG->wwwroot;
-    $params['ltiurl'] = get_config("helixmedia", "launchurl");
-    $params['statusurl'] = helixmedia_get_status_url();
-    $params['userid'] = $USER->id;
-    $params['insertdelay'] = get_config('helixmedia', 'modal_delay');
-    $params['oauthConsumerKey'] = get_config('helixmedia', 'consumer_key');
-    if ($params['insertdelay'] > -1) {
-        $params['hideinsert'] = get_config('atto_helixatto', 'hideinsert');
-    } else {
-        $params['hideinsert'] = 0;
-    }
-    $params['playersizeurl'] = helixmedia_get_playerwidthurl();
-    $params['course'] = $COURSE->id;
-    if ($hasfilter == 1) {
-        if (get_config('atto_helixatto', 'embedopt') == 1) {
-            $params['hasfilter'] = true;
-        } else {
-            $params['hasfilter'] = false;
-        }
-    } else {
-        $params['hasfilter'] = false;
-    }
-    return $params;
+    $cfg = new \stdclass();
+    $cfg->hideinsert = 1;
+    $cfg->placeholder = 0;
+    $cfg->modtypeperm = '';
+    $cfg->uselinkdesc = "forum\r\nworkshop";
+    $cfg->embedopt = 0;
+    return $cfg;
 }
-

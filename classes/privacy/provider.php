@@ -14,23 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
+namespace tiny_medial\privacy;
+
 /**
- * Plugin version and other meta-data are defined here.
+ * Privacy API implementation for the MEDIAL Plugin plugin.
  *
  * @package     tiny_medial
+ * @category    privacy
  * @copyright   2023 MEDIAL, Tim Williams <tim@medial.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class provider implements \core_privacy\local\metadata\null_provider {
 
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->version = 2024012301;
-$plugin->requires  = 2022112800;
-$plugin->component = 'tiny_medial';
-$plugin->maturity = MATURITY_BETA;
-$plugin->release = '8.5.10';
-$plugin->dependencies = [
-    'mod_helixmedia' => '2024012301'
-];
-
-$plugin->supported = [401, 403];
+    /**
+     * Returns stringid of a text explaining that this plugin stores no personal data.
+     *
+     * @return string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
